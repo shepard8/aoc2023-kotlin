@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage
 
 class RectangularGridRenderer(private val cellSize: Int, val distances: DijkstraDistances, private val inset: Int) {
 
-    fun toPng(grid: CellRectangularGrid): BufferedImage {
+    fun toPng(grid: Grid): BufferedImage {
         val rendering = RectangularGridRendering(grid, distances, cellSize, inset)
 
         rendering.setColor(Color.WHITE)

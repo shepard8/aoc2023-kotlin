@@ -5,7 +5,7 @@ import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 
 class RectangularGridRendering(
-    private val grid: CellRectangularGrid,
+    private val grid: Grid,
     private val distances: DijkstraDistances,
     private val cellSize: Int, private val inset: Int
 ) {
@@ -31,10 +31,10 @@ class RectangularGridRendering(
     }
 
     fun drawCells() {
-        grid.getPositions().forEach { drawCell(it) }
+        grid.cells.forEach { drawCell(it) }
     }
 
-    fun drawCell(position: CartesianCoordinate) {
+    fun drawCell(position: Cell) {
         val x = position.x * cellSize
         val y = position.y * cellSize
 
@@ -44,7 +44,7 @@ class RectangularGridRendering(
             graphics.fillRect(x + inset, y + inset, cellSize - 2 * inset, cellSize - 2 * inset)
         }
 
-        if (grid.linked(position, position.north())) {
+        if (position.isLinkedTo(grid.cellAt(position.x, position.y - 1))) {
             withTempColor(distanceColor) {
                 graphics.fillRect(x + inset, y + cellSize - inset, cellSize - 2 * inset, inset)
             }
@@ -55,7 +55,7 @@ class RectangularGridRendering(
             graphics.drawLine(x + inset, y + cellSize - inset, x + cellSize - inset, y + cellSize - inset)
         }
 
-        if (grid.linked(position, position.south())) {
+        if (position.isLinkedTo(grid.cellAt(position.x, position.y + 1))) {
             withTempColor(distanceColor) {
                 graphics.fillRect(x + inset, y, cellSize - 2 * inset, inset)
             }
@@ -66,7 +66,7 @@ class RectangularGridRendering(
             graphics.drawLine(x + inset, y + inset, x + cellSize - inset, y + inset)
         }
 
-        if (grid.linked(position, position.west())) {
+        if (position.isLinkedTo(grid.cellAt(position.x - 1, position.y))) {
             withTempColor(distanceColor) {
                 graphics.fillRect(x, y + inset, inset, cellSize - 2 * inset)
             }
@@ -77,7 +77,7 @@ class RectangularGridRendering(
             graphics.drawLine(x + inset, y + inset, x + inset, y + cellSize - inset)
         }
 
-        if (grid.linked(position, position.east())) {
+        if (position.isLinkedTo(grid.cellAt(position.x + 1, position.y))) {
             withTempColor(distanceColor) {
                 graphics.fillRect(x + cellSize - inset, y + inset, inset, cellSize - 2 * inset)
             }
