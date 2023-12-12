@@ -1,5 +1,3 @@
-import java.time.LocalDateTime
-
 fun main() {
 
     fun countPossibilities(line: String): Long {
@@ -21,17 +19,23 @@ fun main() {
             return 0
         }
 
+        if (s.all { it == '?' }) {
+            val availableSpaces = s.length - l.sumOf { it + 1 } + 1
+            return binomial(availableSpaces + l.size, availableSpaces)
+        }
+
         if (s.startsWith('#')) {
-            if (s.getOrNull(l.first()) == '#' || s.take(l.first()).contains('.')) return 0
+            if (s.getOrNull(l.first()) == '#') return 0
             return countOrganizations(s.drop(l.first() + 1), l.drop(1))
         }
         if (s.endsWith('#')) {
-            if (s.getOrNull(s.length - 1 - l.last()) == '#' || s.takeLast(l.last()).contains('.')) return 0
+            if (s.getOrNull(s.length - 1 - l.last()) == '#') return 0
             return countOrganizations(s.dropLast(l.last() + 1), l.dropLast(1))
         }
 
-        val nextSpring = l.first()
-        val asShar = if (s.getOrNull(nextSpring) ?: '.' == '#') 0 else countOrganizations(s.drop(nextSpring + 1), l.drop(1))
+        if (s.getOrNull(l.first()) == '#') return countOrganizations(s.drop(1), l)
+
+        val asShar = if ((s.getOrNull(l.first()) ?: '.') == '#') 0 else countOrganizations(s.drop(l.first() + 1), l.drop(1))
         val asDot = countOrganizations(s.drop(1), l)
         return asShar + asDot
     }
@@ -39,10 +43,15 @@ fun main() {
     var i = 0
 
     fun countInGroups(groups: List<String>, org: List<Int>): Long {
+        val mandatoryGroup = groups.count { it.contains('#') }
+        if (mandatoryGroup > org.count()) return 0
         if (org.isEmpty() && groups.all { !it.contains('#') }) return 1
         if (groups.isEmpty() && org.isNotEmpty()) return 0
         var sum = 0L
         var n = 0
+        if (groups.size == 1) {
+            return countOrganizations(groups[0], org)
+        }
         while (org.size >= n && org.take(n).sumOf { it + 1 } - 1 <= groups[0].length) {
             sum += countOrganizations(groups[0], org.take(n)) * countInGroups(groups.drop(1), org.drop(n))
             ++n
@@ -50,17 +59,17 @@ fun main() {
         return sum
     }
 
-    fun countUnfoldedPossibilities(line: String): Long {
-        val repeats = 1
-
+    fun countUnfoldedPossibilities(repeats: Int, line: String): Long {
         val (foldedSprings, foldedOrg) = line.split(" ")
         val springs = (foldedSprings + "?").repeat(repeats).dropLast(1)
         val springGroups = springs.split(Regex("\\.+")).filter { it.isNotEmpty() }
         val org = (foldedOrg + ",").repeat(repeats).dropLast(1).split(",").map { it.toInt() }
 //        val cntNew = countOrganizations(springs, org)
-        val cntNew = countInGroups(springGroups, org)
         ++i
-        println("$i: $springs - $org - $cntNew")
+        print("$i: $springs - $org - ")
+        val cntNew = countInGroups(springGroups, org)
+
+        println(cntNew)
 //        val cntOld = countPossibilities(line)
 //        if (cntNew != cntOld) {
 //            println("$line incorrect:$cntNew correct:$cntOld")
@@ -69,12 +78,27 @@ fun main() {
     }
 
     fun part2(input: List<String>): Long {
-//        return countUnfoldedPossibilities("????#??#?.#???? 1,1,1,4")
-        return input.sumOf { countUnfoldedPossibilities(it) }
+        println("158 : " + binomial(45, 35))
+        println("429 : " + "?")
+        return input.sumOf { countUnfoldedPossibilities(5, it) }
     }
 
     val input = readInput("Day12")
 
     part1(input).println()
     part2(input).println()
+}
+
+private fun binomial(n: Int, k: Int): Long {
+    var k = k
+    if (k > n - k) k = n - k
+    var b: Long = 1
+    var i = 1
+    var m = n
+    while (i <= k) {
+        b = b * m / i
+        i++
+        m--
+    }
+    return b
 }
