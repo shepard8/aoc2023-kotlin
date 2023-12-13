@@ -37,3 +37,17 @@ fun gcd(a: Int, b: Int): Int {
 fun lcm(a: Int, b: Int): Int {
     return a / gcd(a, b) * b
 }
+
+fun binomial(n: Int, k: Int): Long {
+    var k = k
+    if (k > n - k) k = n - k
+    var b: Long = 1
+    var i = 1
+    var m = n
+    while (i <= k) {
+        b = b * m / i
+        i++
+        m--
+    }
+    return b
+}
